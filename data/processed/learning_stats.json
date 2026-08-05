@@ -1,0 +1,10 @@
+{
+  "settled_count": 60,
+  "pending_count": 1,
+  "hit_rate": 0.36666666666666664,
+  "cumulative_reward": -20.58066505654963,
+  "avg_reward": -0.34301108427582716,
+  "correct": 22,
+  "wrong": 38,
+  "updated_at": "2026-08-05T17:42:24.956147+00:00"
+}

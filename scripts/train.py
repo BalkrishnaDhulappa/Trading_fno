@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from src.features import load_oc_feature_history, make_training_frame
+from src.learning import DEFAULT_LOG, experience_sample_weights, load_prediction_log
 from src.model import save_artifact, time_series_cv_score, train_final_model
 from src.nifty_data import download_nifty_history, save_spot_history
 
@@ -23,6 +24,12 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=ROOT / "data" / "processed" / "oc_features.csv",
         help="Optional daily option-chain feature history CSV",
+    )
+    parser.add_argument(
+        "--log",
+        type=Path,
+        default=ROOT / DEFAULT_LOG,
+        help="Prediction log used for reward/penalty sample weights",
     )
     parser.add_argument(
         "--model-dir",
@@ -50,6 +57,17 @@ def main() -> None:
     x, y, meta = make_training_frame(spot, oc if not oc.empty else None)
     print(f"Training rows: {len(x)}  |  up-days: {int(y.sum())}  down-days: {int((1 - y).sum())}")
 
+    log = load_prediction_log(args.log)
+    weights = experience_sample_weights(meta["date"], log)
+    if log.empty:
+        print("No settled rewards yet — using uniform sample weights.")
+    else:
+        settled = int((log["settled"].fillna(0).astype(int) == 1).sum()) if "settled" in log.columns else 0
+        print(
+            f"Experience weights from {settled} settled predictions "
+            f"(mean={weights.mean():.3f}, max={weights.max():.3f})."
+        )
+
     metrics = time_series_cv_score(x, y, n_splits=args.splits, confidence_threshold=0.55)
     extra = getattr(metrics, "_extra", {})
     print(
@@ -66,7 +84,7 @@ def main() -> None:
             f"coverage={extra['threshold_coverage']:.3f}"
         )
 
-    model = train_final_model(x, y)
+    model = train_final_model(x, y, sample_weight=weights)
     path = save_artifact(model, metrics, args.model_dir)
     print(f"Saved model → {path}")
     print(f"Saved metrics → {args.model_dir / 'metrics.json'}")

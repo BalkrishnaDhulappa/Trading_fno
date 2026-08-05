@@ -113,9 +113,17 @@ def time_series_cv_score(
     return result
 
 
-def train_final_model(x: pd.DataFrame, y: pd.Series) -> Pipeline:
+def train_final_model(
+    x: pd.DataFrame,
+    y: pd.Series,
+    sample_weight: np.ndarray | None = None,
+) -> Pipeline:
     model = build_model()
-    model.fit(x, y)
+    fit_kwargs: dict[str, Any] = {}
+    if sample_weight is not None:
+        # CalibratedClassifierCV forwards sample_weight to the base estimator.
+        fit_kwargs["clf__sample_weight"] = sample_weight
+    model.fit(x, y, **fit_kwargs)
     return model
 
 
@@ -137,11 +145,17 @@ def load_artifact(model_path: Path) -> dict[str, Any]:
     return joblib.load(model_path)
 
 
-def predict_next_day(model_bundle: dict[str, Any], feature_row: pd.DataFrame) -> dict[str, Any]:
+def predict_next_day(
+    model_bundle: dict[str, Any],
+    feature_row: pd.DataFrame,
+    *,
+    blended_prob_up: float | None = None,
+) -> dict[str, Any]:
     model: Pipeline = model_bundle["model"]
     cols = model_bundle["features"]
     x = feature_row[cols]
-    proba_up = float(model.predict_proba(x)[0, 1])
+    batch_prob_up = float(model.predict_proba(x)[0, 1])
+    proba_up = float(batch_prob_up if blended_prob_up is None else blended_prob_up)
     side = "CE" if proba_up >= 0.5 else "PE"
     confidence = proba_up if side == "CE" else 1.0 - proba_up
     return {
@@ -149,6 +163,7 @@ def predict_next_day(model_bundle: dict[str, Any], feature_row: pd.DataFrame) ->
         "prob_up": proba_up,
         "prob_down": 1.0 - proba_up,
         "confidence": confidence,
+        "batch_prob_up": batch_prob_up,
         "interpretation": (
             "Model leans bullish → prefer ATM/near-ATM CE"
             if side == "CE"

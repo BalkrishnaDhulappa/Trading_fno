@@ -37,5 +37,14 @@
   ],
   "confidence_threshold": 0.55,
   "threshold_accuracy": 0.5001797165933162,
-  "threshold_coverage": 0.31370558375634516
+  "threshold_coverage": 0.31370558375634516,
+  "learning": {
+    "settled_count": 60,
+    "pending_count": 1,
+    "hit_rate": 0.36666666666666664,
+    "cumulative_reward": -20.58066505654963,
+    "avg_reward": -0.34301108427582716,
+    "correct": 22,
+    "wrong": 38
+  }
 }
