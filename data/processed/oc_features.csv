@@ -1,0 +1,2 @@
+date,spot,atm_strike,pcr_oi,pcr_vol,ce_oi,pe_oi,ce_chg_oi,pe_chg_oi,oi_imbalance,atm_ce_ltp,atm_pe_ltp,atm_ce_iv,atm_pe_iv,atm_iv_skew,max_ce_oi_strike,max_pe_oi_strike,max_ce_oi_distance_pct,max_pe_oi_distance_pct,atm_premium_ratio,expiry
+2026-08-05,24624.65,24600.0,0.7172176801930351,1.1464944801850105,2032376.0,1457656.0,697544.0,369700.0,-0.16467470785368157,132.95,141.45,7.71,13.68,5.97,25000.0,24000.0,1.5242856243641982,-2.53668580061037,0.9399080947331212,11-Aug-2026
