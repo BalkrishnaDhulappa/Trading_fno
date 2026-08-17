@@ -1,0 +1,8 @@
+{
+  "name": "Trading_fno",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "user": "ubuntu",
+  "install": "bash scripts/cloud-agent-install.sh"
+}
