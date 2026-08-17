@@ -1,0 +1,10 @@
+# Ignore bulky raw downloads; keep processed feature CSVs trackable if desired.
+data/raw/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.DS_Store
+*.log
+.ipynb_checkpoints/
